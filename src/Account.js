@@ -1,7 +1,7 @@
 'use strict';
 
 const { seedUtils} = require('@waves/waves-transactions');
-const { keyPair, address } = require('@waves/waves-crypto');
+const { keyPair, base58decode, buildAddress } = require('@waves/waves-crypto');
 
 const TESTNET_CHAIN_ID = 'T';
 const MAINNET_CHAIN_ID = 'W';
@@ -18,6 +18,7 @@ const checkChainId = (chainId) => {
 // An account saved into the database.
 exports.SavedWavesAccount = class SavedWavesAccount {
     constructor(fields, chainId) {
+        console.log('SavedWavesAccount::constructor chainId', chainId)
         this._publicKey = fields.public_key;
         this._privateKey = fields.private_key || null;
         this._seed = fields.seed || null;
@@ -31,7 +32,7 @@ exports.SavedWavesAccount = class SavedWavesAccount {
     }
 
     get address() {
-        return address(this._publicKey, this._chainId);
+        return buildAddress(base58decode(this._publicKey), this._chainId);
     }
 
     get seed() {
@@ -40,6 +41,10 @@ exports.SavedWavesAccount = class SavedWavesAccount {
 
     get privateKey() {
         return this._privateKey;
+    }
+
+    get chainId() {
+        return this._chainId;
     }
 };
 
@@ -80,7 +85,7 @@ exports.WavesAccount = class WavesAccount {
         }
         this._publicKey = keys.public;
         this._privateKey = keys.private;
-        this._address = address(keys.public, this._chainId);
+        this._address = buildAddress(base58decode(keys.public), this._chainId);
     }
 
     get seed() {

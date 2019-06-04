@@ -9,8 +9,8 @@
     "nodeApi": {
         "baseUri": "https://testnodes.wavesnodes.com",
         "chainId": "T",
-        "setScriptDefaultFee": 500000,
-        "transactionWaitTimeout": 300000
+        "setScriptDefaultFee": 1400000,
+        "transactionWaitTimeout": 500000
     },
     "restApi": {
         "port": 3000

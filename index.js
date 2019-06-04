@@ -32,5 +32,8 @@ try {
     app.post('/api/app/', newAppController(systemAccount, nodeApiConfig, dbConnection));
     app.listen(restApiConfig.port, () => console.log(`Listening on port ${restApiConfig.port}`));
 } catch (e) {
-    dbconnection.end();
+    console.error(e);
+    if (typeof dbConnection !== 'undefined') {
+        dbconnection.end();
+    }
 }

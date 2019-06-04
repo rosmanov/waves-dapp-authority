@@ -22,8 +22,8 @@ const newJsonRpcError = (errorText, response, code) => {
 
 class SetAppScriptController {
     constructor(dbConnection, nodeApiConfig) {
-        this._accountRepo = new AccountRepository(dbConnection, nodeApiConfig.chainId);
         this._nodeApiConfig = nodeApiConfig;
+        this._accountRepo = new AccountRepository(dbConnection, nodeApiConfig.chainId);
     }
 
     handle(req, res, next) {
@@ -31,25 +31,24 @@ class SetAppScriptController {
         let publicKey = null;
         let rideCompiled = null;
 
+        const errorHandler = (error) => {
+            console.error('Error', error)
+            res.status(500).json(newJsonRpcError(error, res));
+            next();
+        };
+
         Promise.resolve()
             .then(() => {
                 return self.parseParams(req.body.params);
-            }, (error) => {
-                console.error('Error', error)
-                res.status(400).json(newJsonRpcError(
-                    error,
-                    res,
-                    INVALID_PARAMS_ERROR_CODE
-                ));
-            })
+            }, errorHandler)
             .then((params) => {
                 publicKey = params[0];
                 rideCompiled = params[1];
                 return self._accountRepo.get(publicKey);
-            })
+            }, errorHandler)
             .then((targetAccount) => {
                 return self.setAccountScript(targetAccount, rideCompiled);
-            })
+            }, errorHandler)
             .then((tx) => {
                 console.log(`Transaction ${tx.id} has been scheduled`);
                 let result = {
@@ -58,7 +57,7 @@ class SetAppScriptController {
                     public_key: publicKey,
                 };
                 res.json(jsonrpc.success(req.body.id || 0, result));
-            })
+            }, errorHandler)
             .catch(next);
     }
 
@@ -82,16 +81,15 @@ class SetAppScriptController {
     setAccountScript(targetAccount, rideCompiled) {
         let self = this;
 
-        return new Promise((resolve, reject) => {
-            const params = {
-                script: rideCompiled.result.base64,
-                senderPublicKey: targetAccount.publicKey,
-                chainId: targetAccount.chainId,
-                fee: self._nodeApiConfig.setScriptDefaultFee,
-            };
-            const scriptTx = setScript(params, targetAccount.seed);
-            return broadcast(scriptTx, self._nodeApiConfig.baseUri);
-        });
+        const params = {
+            script: rideCompiled.result.base64,
+            senderPublicKey: targetAccount.publicKey,
+            chainId: targetAccount.chainId,
+            fee: self._nodeApiConfig.setScriptDefaultFee,
+        };
+        console.log('setAccountScript params', params);
+        const scriptTx = setScript(params, targetAccount.seed);
+        return broadcast(scriptTx, self._nodeApiConfig.baseUri);
     }
 }
 
@@ -162,10 +160,7 @@ class NewAppController {
     saveAccount(targetAccount) {
         let self = this;
 
-        console.log(
-            'Saving account into database, public key',
-            targetAccount.publicKey
-        );
+        console.log('Saving account into database, public key', targetAccount.publicKey);
         return this._accountRepo.insert(targetAccount);
     }
 
@@ -187,15 +182,7 @@ class NewAppController {
         };
         const transferTx = transfer(params, self._systemAccount.seed);
         return broadcast(transferTx, self._nodeApiConfig.baseUri);
-
-        //return broadcast(transferTx, self._nodeApiConfig.baseUri)
-            //.then((tx) => {
-                //console.log('Transaction', tx);
-                //console.log('Waiting for transaction to be mined into block', tx.id);
-                //return waitForTx(tx.id, self._waitForTxParams);
-            //});
     }
-
 };
 
 module.exports = (systemAccount, nodeApiConfig, dbConnection) => {
