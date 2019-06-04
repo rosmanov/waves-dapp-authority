@@ -1,0 +1,20 @@
+{
+  "name": "waves-dapp-authority",
+  "version": "1.0.0",
+  "description": "Authority for the Waves decentralized applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ruslan Osmanov <rrosmanov@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@waves/ride-js": "^0.17.7",
+    "@waves/waves-crypto": "^2.1.2",
+    "@waves/waves-transactions": "^3.8.0",
+    "config": "^3.1.0",
+    "express": "^4.17.1",
+    "mysql": "^2.17.1",
+    "typescript": "^3.5.1"
+  }
+}

@@ -1,0 +1,21 @@
+{
+    "db": {
+        "host": "localhost",
+        "port": 3306,
+        "dbName": "database_name",
+        "user": "username",
+        "password": "password"
+    },
+    "nodeApi": {
+        "baseUri": "https://testnodes.wavesnodes.com",
+        "chainId": "T",
+        "setScriptDefaultFee": 500000,
+        "transactionWaitTimeout": 300000
+    },
+    "restApi": {
+        "port": 3000
+    },
+    "systemAccount": {
+        "seed": "nasty sound ketchup inflict lecture fetch long tornado elbow scan inside shuffle"
+    }
+}

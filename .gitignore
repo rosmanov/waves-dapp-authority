@@ -1,0 +1,7 @@
+*~
+*.log
+*.gz
+*.zip
+*.sw[op]
+/node_modules/
+/config/local*
