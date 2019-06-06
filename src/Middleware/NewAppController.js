@@ -74,7 +74,7 @@ class SetAppScriptController {
                 return reject('Failed to compile RIDE code: ' + rideCompiled.error);
             }
 
-            resolve([publicKey, rideCompiled])
+            resolve([publicKey, rideCompiled]);
         });
     }
 
@@ -119,15 +119,14 @@ class NewAppController {
         let self = this;
         let amount = 0;
 
+        const errorHandler = (error) => {
+            console.error('Error', error)
+            res.status(500).json(newJsonRpcError(error, res));
+            next();
+        };
+
         Promise.resolve().then(() => {
             const targetAccount = new WavesAccount(null, self._nodeApiConfig.chainId);
-
-            const transferErrorHandler = (error) => {
-                res.status(500).json(newJsonRpcError(
-                    `Failed to transfer ${amount} to ${targetAccount.address}:` + error,
-                    res
-                ));
-            };
 
             self.parseParams(req.body.params)
                 .then((params) => {
@@ -142,10 +141,10 @@ class NewAppController {
                 })
                 .then(() => {
                     return self.saveAccount(targetAccount);
-                })
+                }, errorHandler)
                 .then(() => {
                     return self.transfer(targetAccount, amount)
-                })
+                }, errorHandler)
                 .then((tx) => {
                     console.log(`Transaction ${tx.id} has been scheduled`);
                     let result = {
@@ -153,7 +152,7 @@ class NewAppController {
                         public_key: targetAccount.publicKey,
                     };
                     res.json(jsonrpc.success(req.body.id || 0, result));
-                });
+                }, errorHandler);
         }).catch(next);
     }
 
